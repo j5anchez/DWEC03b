@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interfaz de Acceso al Juego</title>
+    <style>
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="loginForm">
+        <label for="username">Usuario:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="button" onclick="validateForm()">Enviar</button>
+    </form>
+    <div id="errorMessage" class="error-message" style="display:none;"></div>
+    <script>
+        function validarContrasena(contrasena) {
+            const regex = /^[a-zA-Z0-9]+$/;
+            if (!regex.test(contrasena)) {
+                const caracterEspecial = encontrarCaracterEspecial(contrasena);
+                if (caracterEspecial) {
+                    alert(`La contraseña contiene un carácter especial: ${caracterEspecial}`);
+                } else {
+                    alert('La contraseña no cumple con los criterios especificados.');
+                }
+                return false;
+            }
+            return true;
+        }
+        function encontrarCaracterEspecial(contrasena) {
+            const caracteresEspeciales = Array.from({ length: 96 - 31 + 1 }, (_, i) => String.fromCharCode(31 + i))
+                .concat(String.fromCharCode(123));
+            for (const caracter of contrasena) {
+                if (caracteresEspeciales.includes(caracter)) {
+                    return caracter;
+                }
+            }
+            return null;
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("usuarios.json")
+                .then(response => response.json())
+                .then(data => {
+                    localStorage.setItem("usuarios", JSON.stringify(data));
+                })
+                .catch(error => console.error("Error al cargar el archivo JSON:", error));
+        });
+        function validateForm() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            if (!validarContrasena(password)) {
+                return;
+            }
+            var usuarios = JSON.parse(localStorage.getItem("usuarios"));
+            var userExists = usuarios.some(user => user.usuario === username && user.contraseña === password);
+            if (userExists) {
+                window.location.href = "index2.html";
+            } else {
+                var errorMessage = document.getElementById("errorMessage");
+                errorMessage.textContent = "El usuario no está registrado";
+                errorMessage.style.display = "block";
+            }
+        }
+    </script>
+</body>
+
+</html>
